@@ -98,7 +98,25 @@ Open `index.html` and search for these to make them exactly right:
 - **Current role** — the "Now · 2022 —" entry says *"Autonomous driving … · Germany"*.
   Add your real company/title/city if you want them shown.
 - **Dates** — the years in the *Trajectory* section are my best estimates; adjust freely.
-- **Contact email** — currently `vsb.control@gmail.com` (appears twice). Change if needed.
 - **Citations** — the main page shows *"800+"*; edit or remove the number.
+
+(Your email is **not** on the page anymore — the Contact section is a private form, see below.)
+
+---
+
+## 5 — Contact form setup (keeps your email private)
+
+The Contact section is a form, not a visible email address. It sends messages through
+**Formspree** (free), so visitors never see where the mail goes.
+
+1. Go to **formspree.io**, create a free account.
+2. Create a new form and set its destination to **whatever address you want messages sent
+   to** (e.g. your Gmail). Formspree gives you an endpoint like `https://formspree.io/f/abcdwxyz`.
+3. In `index.html`, find `https://formspree.io/f/YOUR_FORM_ID` and replace `YOUR_FORM_ID`
+   with your form's id, then re-upload `index.html`.
+4. Send yourself one test message — Formspree asks you to confirm the destination the first time.
+
+Prefer not to make an account? **web3forms.com** does the same with just an access key —
+tell me and I'll wire that version instead.
 
 That's it. Tell me any of these and I can hand you an updated `index.html`.
