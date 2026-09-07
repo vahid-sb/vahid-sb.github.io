@@ -16,7 +16,9 @@ from posts_data import POSTS
 
 with open(os.path.join(BASE, "index.html"), encoding="utf-8") as f:
     index_html = f.read()
-HEAD = index_html[: index_html.index("</style>") + len("</style>")]
+# Shared "head content" = everything from <title> through </style> in index.html
+_start = index_html.index("<title>")
+HEAD_INNER = index_html[_start: index_html.index("</style>") + len("</style>")]
 
 SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'
 MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
@@ -35,9 +37,13 @@ def strip_tags(s):
 def split_paras(body):
     return [b.strip() for b in body.strip().split("\n\n") if b.strip()]
 
-def head_for(title, extra=""):
-    h = HEAD.replace("<title>Vahid S. Bokharaie</title>", "<title>" + title + "</title>", 1)
-    return h + ("\n" + extra if extra else "")
+def page(title, body, extra_head=""):
+    head = HEAD_INNER.replace("<title>Vahid S. Bokharaie</title>", "<title>" + title + "</title>", 1)
+    return ('<!doctype html>\n<html lang="en">\n<head>\n'
+            '<meta charset="utf-8">\n'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+            + head + (("\n" + extra_head) if extra_head else "")
+            + '\n</head>\n<body>\n' + body + '\n</body>\n</html>\n')
 
 def nav(active, prefix=""):
     def hl(name):
@@ -52,7 +58,7 @@ def nav(active, prefix=""):
 '      <a href="' + prefix + 'index.html#software">software</a>\n'
 '      <a href="' + prefix + 'index.html#experience">experience</a>\n'
 '      <a href="' + prefix + 'index.html#publications">publications</a>\n'
-'      <a href="' + prefix + 'thoughts.html"' + hl("thoughts") + '>thoughts</a>\n'
+'      <a href="' + prefix + 'thoughts.html" class="nav-cta"' + hl("thoughts") + '>thoughts</a>\n'
 '      <a href="' + prefix + 'index.html#contact">contact</a>\n'
 '    </nav>\n'
 '    <button class="theme-btn" id="themeBtn" aria-label="Toggle color theme">\n'
@@ -127,7 +133,7 @@ posts = sorted(POSTS, key=lambda p: p["date"], reverse=True)
 os.makedirs(os.path.join(BASE, "posts"), exist_ok=True)
 for p in posts:
     body_html = "\n".join("<p>" + para.replace("\n", " ") + "</p>" for para in split_paras(p["body"]))
-    page = head_for(p["title"] + " — Vahid S. Bokharaie") + "\n" + nav("thoughts", "../") + (
+    body = nav("thoughts", "../") + (
 '\n<main>\n'
 '<article class="block" style="padding-top:clamp(2.5rem,6vw,4.5rem)">\n'
 '  <div class="wrap" style="max-width:820px">\n'
@@ -139,8 +145,9 @@ for p in posts:
 '    <p style="margin-top:1.2rem"><a href="../thoughts.html" style="font-family:var(--mono);font-size:.8rem">&#8592; Back to all posts</a></p>\n'
 '  </div>\n'
 '</article>\n</main>\n') + footer("../") + "\n" + THEME_JS
+    html = page(p["title"] + " — Vahid S. Bokharaie", body)
     with open(os.path.join(BASE, "posts", p["slug"] + ".html"), "w", encoding="utf-8") as f:
-        f.write(page)
+        f.write(html)
 
 # ── the Thoughts & Past Work index ───────────────────────────────────────────
 counts = Counter(p["category"] for p in posts)
@@ -160,7 +167,7 @@ for p in posts:
 '        <p class="post-excerpt">' + excerpt + '</p>\n'
 '      </a>\n')
 
-thoughts = head_for("Thoughts & Past Work — Vahid S. Bokharaie", BLOG_CSS) + "\n" + nav("thoughts") + (
+thoughts_body = nav("thoughts") + (
 '\n<section class="block" style="padding-top:clamp(3rem,7vw,5rem);padding-bottom:clamp(1.5rem,3vw,2.5rem)">\n'
 '  <div class="wrap">\n'
 '    <p class="eyebrow">Thoughts &amp; Past Work</p>\n'
@@ -177,8 +184,9 @@ thoughts = head_for("Thoughts & Past Work — Vahid S. Bokharaie", BLOG_CSS) + "
 '    <p class="empty-note" id="emptyNote" hidden>No posts in this category yet.</p>\n'
 '  </div>\n'
 '</section>\n</main>\n') + footer() + "\n" + FILTER_JS + "\n" + THEME_JS
+
 with open(os.path.join(BASE, "thoughts.html"), "w", encoding="utf-8") as f:
-    f.write(thoughts)
+    f.write(page("Thoughts & Past Work — Vahid S. Bokharaie", thoughts_body, BLOG_CSS))
 
 print("Built thoughts.html and " + str(len(posts)) + " post page(s):")
 for p in posts:
