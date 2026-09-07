@@ -37,6 +37,12 @@ def strip_tags(s):
 def split_paras(body):
     return [b.strip() for b in body.strip().split("\n\n") if b.strip()]
 
+def render_block(b):
+    b = b.strip()
+    if re.match(r'^<(h[1-6]|ul|ol|li|figure|img|blockquote|pre|table|div)\b', b, re.I):
+        return b  # already a block-level element (subheading, list, image…)
+    return "<p>" + b.replace("\n", " ") + "</p>"
+
 def page(title, body, extra_head=""):
     head = HEAD_INNER.replace("<title>Vahid S. Bokharaie</title>", "<title>" + title + "</title>", 1)
     return ('<!doctype html>\n<html lang="en">\n<head>\n'
@@ -132,7 +138,7 @@ posts = sorted(POSTS, key=lambda p: p["date"], reverse=True)
 # ── individual post pages ────────────────────────────────────────────────────
 os.makedirs(os.path.join(BASE, "posts"), exist_ok=True)
 for p in posts:
-    body_html = "\n".join("<p>" + para.replace("\n", " ") + "</p>" for para in split_paras(p["body"]))
+    body_html = "\n".join(render_block(x) for x in split_paras(p["body"]))
     body = nav("thoughts", "../") + (
 '\n<main>\n'
 '<article class="block" style="padding-top:clamp(2.5rem,6vw,4.5rem)">\n'
