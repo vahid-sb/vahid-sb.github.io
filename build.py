@@ -194,6 +194,16 @@ thoughts_body = nav("thoughts") + (
 with open(os.path.join(BASE, "thoughts.html"), "w", encoding="utf-8") as f:
     f.write(page("Thoughts & Past Work — Vahid S. Bokharaie", thoughts_body, BLOG_CSS))
 
-print("Built thoughts.html and " + str(len(posts)) + " post page(s):")
+# ── sitemap.xml (for Google Search Console) ──────────────────────────────────
+SITE = "https://vahid-sb.com"
+sm_urls = [SITE + "/", SITE + "/thoughts.html"] + [SITE + "/posts/" + p["slug"] + ".html" for p in posts]
+sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+for u in sm_urls:
+    sm += "  <url><loc>" + u + "</loc></url>\n"
+sm += "</urlset>\n"
+with open(os.path.join(BASE, "sitemap.xml"), "w", encoding="utf-8") as f:
+    f.write(sm)
+
+print("Built thoughts.html, sitemap.xml, and " + str(len(posts)) + " post page(s):")
 for p in posts:
     print("  " + p["date"] + "  [" + p["category"] + "]  posts/" + p["slug"] + ".html")
